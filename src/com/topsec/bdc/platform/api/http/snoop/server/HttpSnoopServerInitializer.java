@@ -1,24 +1,8 @@
-/*
- * Copyright 2012 The Netty Project
- *
- * The Netty Project licenses this file to you under the Apache License,
- * version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at:
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
 package com.topsec.bdc.platform.api.http.snoop.server;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.ssl.SslContext;
@@ -26,9 +10,9 @@ import io.netty.handler.ssl.SslContext;
 
 /**
  * 
- * Your class summary,end with '.'.
+ * 服务器Handler构建.
  * 
- * Your class Detail description,end with '.'.
+ * 构建服务器处理数据流的上下行Handler.
  * 
  * @title HttpSnoopServerInitializer
  * @package com.topsec.bdc.platform.api.http.snoop.server
@@ -39,7 +23,13 @@ import io.netty.handler.ssl.SslContext;
  */
 public class HttpSnoopServerInitializer extends ChannelInitializer<SocketChannel> {
 
+    /**
+     * SSL支持.
+     */
     private final SslContext _sslCtx;
+    /**
+     * 服务器配置实例.
+     */
     private final HttpServerConfiguration _serverConfig;
 
     public HttpSnoopServerInitializer(SslContext sslCtx, HttpServerConfiguration serverConfig) {
@@ -52,6 +42,7 @@ public class HttpSnoopServerInitializer extends ChannelInitializer<SocketChannel
     public void initChannel(SocketChannel ch) {
 
         ChannelPipeline p = ch.pipeline();
+        //支持SSL
         if (_sslCtx != null) {
             p.addLast(_sslCtx.newHandler(ch.alloc()));
         }
@@ -60,8 +51,9 @@ public class HttpSnoopServerInitializer extends ChannelInitializer<SocketChannel
         //p.addLast(new HttpObjectAggregator(1048576));
         p.addLast(new HttpResponseEncoder());
         // Remove the following line if you don't want automatic content compression.
-        p.addLast(new HttpContentCompressor());
-        //
+        //And response chunked or not
+        //p.addLast(new HttpContentCompressor());
+        //加入业务支持处理Handler
         p.addLast(new HttpSnoopServerHandler(_serverConfig));
         //
 

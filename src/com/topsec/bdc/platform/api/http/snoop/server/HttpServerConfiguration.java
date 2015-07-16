@@ -1,6 +1,6 @@
 package com.topsec.bdc.platform.api.http.snoop.server;
 
-import com.topsec.bdc.platform.api.server.IHandler;
+import com.topsec.bdc.platform.api.server.IRequestListener;
 import com.topsec.bdc.platform.core.services.IConfiguration;
 
 
@@ -34,7 +34,7 @@ public class HttpServerConfiguration implements IConfiguration {
     //
     public long _requestTotal = 0;
     //
-    public IHandler _requestHandler = null;
+    public IRequestListener _requestListener = null;
 
     @Override
     public String getDescription() {
