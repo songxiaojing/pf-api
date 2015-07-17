@@ -3,6 +3,7 @@ package com.topsec.bdc.platform.api.http.snoop.server;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.ssl.SslContext;
@@ -50,9 +51,12 @@ public class HttpSnoopServerInitializer extends ChannelInitializer<SocketChannel
         // Uncomment the following line if you don't want to handle HttpChunks.
         //p.addLast(new HttpObjectAggregator(1048576));
         p.addLast(new HttpResponseEncoder());
-        // Remove the following line if you don't want automatic content compression.
-        //And response chunked or not
-        //p.addLast(new HttpContentCompressor());
+        //
+        if (_serverConfig._enableCompressor == true) {
+            // Remove the following line if you don't want automatic content compression.
+            //And response chunked or not
+            p.addLast(new HttpContentCompressor());
+        }
         //加入业务支持处理Handler
         p.addLast(new HttpSnoopServerHandler(_serverConfig));
         //

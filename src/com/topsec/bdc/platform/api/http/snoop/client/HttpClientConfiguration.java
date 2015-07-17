@@ -1,23 +1,15 @@
-package com.topsec.bdc.platform.api.http.snoop.server;
+package com.topsec.bdc.platform.api.http.snoop.client;
 
-import com.topsec.bdc.platform.api.server.IRequestListener;
 import com.topsec.bdc.platform.core.services.IConfiguration;
 
 
 /**
+ * This class is used to pass all configuration data that is required by a client network connection.
  * 
- * Your class summary,end with '.'.
- * 
- * Your class Detail description,end with '.'.
- * 
- * @title HttpServerConfiguration
- * @package com.topsec.bdc.platform.api.http.snoop.server
- * @author baiyanwei
- * @version
- * @date Jul 15, 2015
+ * @author baiyanwei Jul 8, 2013
  * 
  */
-public class HttpServerConfiguration implements IConfiguration {
+public class HttpClientConfiguration implements IConfiguration {
 
     public String _id = null;
     public String _name = null;
@@ -33,9 +25,11 @@ public class HttpServerConfiguration implements IConfiguration {
     public boolean _enableSSL = false;
     public boolean _enableCompressor = false;
     //
-    public long _requestTotal = 0;
+    public boolean _synchronousConnection = true;
     //
-    public IRequestListener _requestListener = null;
+    public IClientResponseListener _clientResponseListener = null;
+
+    //
 
     @Override
     public String getDescription() {
@@ -72,4 +66,5 @@ public class HttpServerConfiguration implements IConfiguration {
 
         return this._id;
     }
+
 }

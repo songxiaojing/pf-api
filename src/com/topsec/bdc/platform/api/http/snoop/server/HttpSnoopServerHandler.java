@@ -74,7 +74,7 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
             ByteBuf content = httpContent.content();
             if (content.isReadable()) {
                 _requestBodyBuf.append(content.toString(CharsetUtil.UTF_8));
-                content.release();
+                //content.release();
             }
 
             if (msg instanceof LastHttpContent) {
@@ -114,6 +114,7 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
+        cause.printStackTrace();
         try {
             this._serverConfig._requestListener.fireError(cause);
         } catch (Throwable e) {

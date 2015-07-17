@@ -97,7 +97,6 @@ public final class HttpSnoopServer extends AbstractMetricMBean implements IServe
             _bootstrap.channel(NioServerSocketChannel.class);
             _bootstrap.handler(new LoggingHandler(LogLevel.INFO));
             _bootstrap.childHandler(new HttpSnoopServerInitializer(sslCtx, _serverConfig));
-            //_bootstrap.childHandler(new com.topsec.bdc.platform.api.test.http.snoop.HttpSnoopServerInitializer(sslCtx));
             //
             if (_serverConfig._enableTimeout == true) {
                 _bootstrap.option(ChannelOption.SO_TIMEOUT, _serverConfig._timeout);

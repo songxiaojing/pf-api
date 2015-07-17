@@ -1,18 +1,3 @@
-/*
- * Copyright 2012 The Netty Project
- *
- * The Netty Project licenses this file to you under the Apache License,
- * version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at:
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
 package com.topsec.bdc.platform.api.http.snoop.client;
 
 import io.netty.channel.ChannelInitializer;
@@ -23,13 +8,29 @@ import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.ssl.SslContext;
 
 
+/**
+ * 
+ * Your class summary,end with '.'.
+ * 
+ * Your class Detail description,end with '.'.
+ * 
+ * @title HttpSnoopClientInitializer
+ * @package com.topsec.bdc.platform.api.http.snoop.client
+ * @author baiyanwei
+ * @version
+ * @date Jul 17, 2015
+ * 
+ */
 public class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel> {
 
     private final SslContext sslCtx;
 
-    public HttpSnoopClientInitializer(SslContext sslCtx) {
+    private final HttpClientConfiguration _httpClientConfiguration;
+
+    public HttpSnoopClientInitializer(SslContext sslCtx, HttpClientConfiguration httpClientConfiguration) {
 
         this.sslCtx = sslCtx;
+        this._httpClientConfiguration = httpClientConfiguration;
     }
 
     @Override
@@ -50,6 +51,6 @@ public class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel
         // Uncomment the following line if you don't want to handle HttpContents.
         //p.addLast(new HttpObjectAggregator(1048576));
 
-        p.addLast(new HttpSnoopClientHandler());
+        p.addLast(new HttpSnoopClientHandler(_httpClientConfiguration));
     }
 }
