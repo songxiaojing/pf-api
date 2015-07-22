@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.topsec.bdc.platform.api.client.HttpClientConfiguration;
 import com.topsec.bdc.platform.core.exception.PlatformException;
 import com.topsec.bdc.platform.core.utils.Assert;
 
@@ -166,76 +167,5 @@ public final class HttpSnoopClient {
                 _group.shutdownGracefully();
             }
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        HttpClientConfiguration hcc = new HttpClientConfiguration();
-        hcc._id = "1";
-        hcc._name = "Test Http Server";
-        hcc._description = "Just for test";
-        hcc._serverIpAddress = "127.0.0.1";
-        hcc._serverPort = 8080;
-        hcc._clientResponseListener = new IClientResponseListener() {
-
-            @Override
-            public void setID(String id) {
-
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public String getID() {
-
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public void setName(String name) {
-
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public String getName() {
-
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public void setDescription(String description) {
-
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public String getDescription() {
-
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public void fireSucceed(String message) throws PlatformException {
-
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>" + message);
-            }
-
-            @Override
-            public void fireError(PlatformException exception) throws PlatformException {
-
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>" + exception);
-
-            }
-        };
-        HttpSnoopClient hsc = new HttpSnoopClient(hcc);
-        hsc.setContent("body");
-        hsc.setHttpMethod(HttpMethod.POST.name());
-        hsc.start();
     }
 }

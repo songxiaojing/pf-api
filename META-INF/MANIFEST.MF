@@ -8,7 +8,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: topsec
 Bundle-ClassPath: .
-Export-Package: com.topsec.bdc.platform.api.http.client
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.9.100",
  pf-log;bundle-version="1.0.0",
  pf-core;bundle-version="1.0.0",

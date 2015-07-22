@@ -19,6 +19,9 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+
+import com.topsec.bdc.platform.api.server.ServerReferent;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -41,9 +44,9 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
     /** Buffer that stores the response content */
     private final StringBuilder _requestBodyBuf = new StringBuilder();
 
-    private final HttpServerConfiguration _serverConfig;
+    private final ServerReferent _serverConfig;
 
-    public HttpSnoopServerHandler(HttpServerConfiguration serverConfig) {
+    public HttpSnoopServerHandler(ServerReferent serverConfig) {
 
         this._serverConfig = serverConfig;
     }

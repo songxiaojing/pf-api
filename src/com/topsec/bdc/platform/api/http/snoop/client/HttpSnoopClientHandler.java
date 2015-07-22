@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.CharsetUtil;
 
+import com.topsec.bdc.platform.api.client.HttpClientConfiguration;
 import com.topsec.bdc.platform.core.exception.PlatformException;
 
 

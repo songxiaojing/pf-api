@@ -1,19 +1,18 @@
 package com.topsec.bdc.platform.api;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.topsec.bdc.platform.api.services.APIEngineService;
-import com.topsec.bdc.platform.core.services.ServiceHelper;
+import com.topsec.bdc.platform.core.activator.PlatformActivator;
 import com.topsec.bdc.platform.log.PlatformLogger;
 
 
-public class Activator implements BundleActivator {
+public class Activator extends PlatformActivator {
 
     private static PlatformLogger logger = PlatformLogger.getLogger(Activator.class);
     private static BundleContext context;
 
-    static BundleContext getContext() {
+    public static BundleContext getContext() {
 
         return context;
     }
@@ -25,8 +24,8 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
 
         Activator.context = bundleContext;
+        this.registerService(new APIEngineService());
         logger.info("###PL-API is started~");
-        ServiceHelper.registerService(new APIEngineService());
     }
 
     /*
@@ -36,6 +35,7 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext bundleContext) throws Exception {
 
         Activator.context = null;
+        this.unregisterAllService();
     }
 
 }

@@ -3,17 +3,36 @@
 <plugin>
    <extension-point id="platformApiServer" name="platformApi" schema="schema/pfApiServer.exsd"/>
    <extension point="com.topsec.bdc.platform.api.platformApiServer">
-      <server id="api:http:8888" name="api:http:8888" description="the test api for platform" implement_class="com.topsec.bdc.platform.api.http.server.HttpServer">
-         <property name="port" value="8888" />
-         <handler id="pf-api.httphandler" name="http_root_handler" description="an test handler for http server" implement_class="com.topsec.bdc.platform.api.http.server.SimpleHttpRequstHandler">
-               <property name="path" value="/" />
-         </handler>
-      </server>
-      <server id="api:http:9999" name="api:http:9999" description="the test api for platform" implement_class="com.topsec.bdc.platform.api.http.server.HttpServer">
-         <property name="port" value="9999" />
-         <handler id="pf-api.httphandler" name="http_root_handler" description="an test handler for http server" implement_class="com.topsec.bdc.platform.api.http.server.SimpleHttpRequstHandler">
-               <property name="path" value="/abc" />
-         </handler>
+   </extension>
+   <extension
+         point="com.topsec.bdc.platform.api.platformApiServer">
+      <server
+            description="management api for platform."
+            id="pf-api.management"
+            implement_class="com.topsec.bdc.platform.api.management.ManagementApiServer"
+            name="management">
+         <serverReferent
+               implement_class="com.topsec.bdc.platform.api.management.ManagementServerReferent"
+               name="pf-api.serverReferent">
+            <property
+                  name="serverIpAddress"
+                  value="127.0.0.1">
+            </property>
+            <property
+                  name="serverPort"
+                  value="50001">
+            </property>
+            <handler
+                  description="dsdfsdf"
+                  id="pf-api.handler2"
+                  implement_class="com.topsec.bdc.platform.api.management.ManagementRequestListener"
+                  name="pf-api.handler2">
+               <property
+                     name="name"
+                     value="/abc/">
+               </property>
+            </handler>
+         </serverReferent>
       </server>
    </extension>
 </plugin>

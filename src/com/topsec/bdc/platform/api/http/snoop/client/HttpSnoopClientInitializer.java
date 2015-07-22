@@ -1,5 +1,7 @@
 package com.topsec.bdc.platform.api.http.snoop.client;
 
+import com.topsec.bdc.platform.api.client.HttpClientConfiguration;
+
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;

@@ -1,5 +1,7 @@
 package com.topsec.bdc.platform.api.http.snoop.server;
 
+import com.topsec.bdc.platform.api.server.ServerReferent;
+
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -31,9 +33,9 @@ public class HttpSnoopServerInitializer extends ChannelInitializer<SocketChannel
     /**
      * 服务器配置实例.
      */
-    private final HttpServerConfiguration _serverConfig;
+    private final ServerReferent _serverConfig;
 
-    public HttpSnoopServerInitializer(SslContext sslCtx, HttpServerConfiguration serverConfig) {
+    public HttpSnoopServerInitializer(SslContext sslCtx, ServerReferent serverConfig) {
 
         this._sslCtx = sslCtx;
         this._serverConfig = serverConfig;

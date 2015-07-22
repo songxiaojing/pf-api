@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="server" minOccurs="1" maxOccurs="10"/>
+            <element ref="server" minOccurs="1" maxOccurs="50"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -55,8 +55,8 @@
       </annotation>
       <complexType>
          <sequence minOccurs="0" maxOccurs="30">
-            <element ref="property"/>
-            <element ref="handler"/>
+            <element ref="property" minOccurs="1" maxOccurs="20"/>
+            <element ref="serverReferent"/>
          </sequence>
          <attribute name="implement_class" type="string" use="required">
             <annotation>
@@ -64,7 +64,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.byw.dalek.platform.api.IAPIServer.IServer"/>
+                  <meta.attribute kind="java" basedOn=":com.topsec.bdc.platform.api.server.IServer"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -113,8 +113,8 @@
 
    <element name="handler">
       <complexType>
-         <sequence minOccurs="0" maxOccurs="20">
-            <element ref="property"/>
+         <sequence minOccurs="1" maxOccurs="30">
+            <element ref="property" minOccurs="1" maxOccurs="20"/>
          </sequence>
          <attribute name="implement_class" type="string" use="required">
             <annotation>
@@ -122,7 +122,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.byw.dalek.platform.api.IAPIServer.IHandler"/>
+                  <meta.attribute kind="java" basedOn=":com.topsec.bdc.platform.api.server.IRequestListener"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -141,6 +141,32 @@
             </annotation>
          </attribute>
          <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="serverReferent">
+      <complexType>
+         <sequence minOccurs="1" maxOccurs="30">
+            <element ref="property" minOccurs="1" maxOccurs="20"/>
+            <element ref="handler"/>
+         </sequence>
+         <attribute name="implement_class" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn="com.topsec.bdc.platform.api.server.ServerReferent:"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
                   

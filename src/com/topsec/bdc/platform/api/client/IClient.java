@@ -17,26 +17,4 @@ import com.topsec.bdc.platform.core.services.ILife;
  * 
  */
 public interface IClient extends ILife {
-
-    /**
-     * Clients and servers need to provide the id that they were given to all the processing workflow to find service they require.
-     * 
-     * @return
-     */
-    public String getId();
-
-    /**
-     * set the client running parameter or configuration
-     * 
-     * @param client
-     */
-    public void configure(ClientConfiguration client);
-
-    /**
-     * get configuration.
-     * 
-     * @return
-     */
-    public ClientConfiguration getConfiguration();
-
 }
