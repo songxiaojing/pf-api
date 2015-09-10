@@ -1,8 +1,6 @@
 package com.topsec.bdc.platform.api.server;
 
-import java.util.List;
-import java.util.Map;
-
+import com.topsec.bdc.platform.core.exception.PlatformException;
 import com.topsec.bdc.platform.core.services.IConfiguration;
 
 
@@ -11,7 +9,7 @@ import com.topsec.bdc.platform.core.services.IConfiguration;
  */
 public interface IRequestListener extends IConfiguration {
 
-    public String fireSucceed(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception;
+    public String fireSucceed(Object[] object) throws PlatformException;
 
-    public String fireError(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception;
+    public String fireError(Object[] object) throws PlatformException;
 }

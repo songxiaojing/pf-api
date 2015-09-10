@@ -21,8 +21,6 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.9.100",
  io.netty.transport;bundle-version="4.0.29"
 Export-Package: com.topsec.bdc.platform.api,
  com.topsec.bdc.platform.api.client,
- com.topsec.bdc.platform.api.http.snoop.client,
- com.topsec.bdc.platform.api.http.snoop.server,
  com.topsec.bdc.platform.api.management,
  com.topsec.bdc.platform.api.server,
  com.topsec.bdc.platform.api.server.http,

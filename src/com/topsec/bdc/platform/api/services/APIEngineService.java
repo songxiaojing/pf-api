@@ -112,7 +112,7 @@ public class APIEngineService extends AbstractMetricMBean implements IService {
                                 theLogger.info("bundleListener", listenerElement.getAttribute(IConfiguration.NAME_CONF_TITLE), server.getName());
                             }
                         }
-                        server.setHttpServerReferent(serverReferent);
+                        server.setServerReferent(serverReferent);
                         theLogger.info("bundleServerReferent", serverReferent.getName(), server.getName(), serverReferent.getServerIpAddress(), serverReferent.getServerPort());
                     }
                 }

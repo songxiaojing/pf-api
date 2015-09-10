@@ -13,20 +13,8 @@ import com.topsec.bdc.platform.core.services.IConfiguration;
  */
 public interface IResponseListener extends IConfiguration {
 
-    /**
-     * fire on successful
-     * 
-     * @param messageObj
-     * @throws Exception
-     */
-    public void fireSucceed(String message) throws PlatformException;
+    public String fireSucceed(Object[] object) throws PlatformException;
 
-    /**
-     * fire on error
-     * 
-     * @param messageObj
-     * @throws Exception
-     */
-    public void fireError(PlatformException exception) throws PlatformException;
+    public String fireError(Object[] object) throws PlatformException;
 
 }

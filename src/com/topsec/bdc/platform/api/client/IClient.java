@@ -17,4 +17,8 @@ import com.topsec.bdc.platform.core.services.ILife;
  * 
  */
 public interface IClient extends ILife {
+
+    public void setClientReferent(ClientReferent ClientReferent);
+
+    public ClientReferent getClientReferent();
 }

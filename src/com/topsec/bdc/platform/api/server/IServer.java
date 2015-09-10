@@ -10,5 +10,5 @@ import com.topsec.bdc.platform.core.services.ILife;
  */
 public interface IServer extends ILife, IConfiguration {
 
-    public void setHttpServerReferent(ServerReferent serverConfig);
+    public void setServerReferent(ServerReferent serverConfig);
 }

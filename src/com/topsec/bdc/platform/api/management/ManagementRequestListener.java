@@ -2,13 +2,16 @@ package com.topsec.bdc.platform.api.management;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.topsec.bdc.platform.api.server.IServer;
 import com.topsec.bdc.platform.api.server.http.HttpSoopRequestListener;
 import com.topsec.bdc.platform.api.services.APIEngineService;
+import com.topsec.bdc.platform.core.exception.PlatformException;
 import com.topsec.bdc.platform.core.services.ServiceHelper;
 
 
@@ -21,7 +24,7 @@ public class ManagementRequestListener extends HttpSoopRequestListener {
     }
 
     @Override
-    public String fireSucceed(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception {
+    public String fireSucceed(Object[] parameters) throws PlatformException {
 
         if (aPIEngineService == null) {
             aPIEngineService = ServiceHelper.findService(APIEngineService.class);
@@ -30,6 +33,10 @@ public class ManagementRequestListener extends HttpSoopRequestListener {
             }
         }
 
+        Iterable<Map.Entry<String, String>> head = (Iterable<Entry<String, String>>) parameters[0];
+        Map<String, List<String>> parameterMap = (Map<String, List<String>>) parameters[1];
+        String path = (String) parameters[2];
+        String message = (String) parameters[3];
         JSONArray apiArray = new JSONArray();
         List<IServer> httpServerList = aPIEngineService.getApiServersList();
 
@@ -40,9 +47,15 @@ public class ManagementRequestListener extends HttpSoopRequestListener {
                 if (server == null) {
                     continue;
                 }
-                apiObject.put("name", server.getName());
-                apiObject.put("id", server.getID());
-                apiObject.put("desc", server.getDescription());
+                try {
+                    apiObject.put("name", server.getName());
+                    apiObject.put("id", server.getID());
+                    apiObject.put("desc", server.getDescription());
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
                 apiArray.put(apiObject);
             }
         }
@@ -51,9 +64,13 @@ public class ManagementRequestListener extends HttpSoopRequestListener {
     }
 
     @Override
-    public String fireError(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception {
+    public String fireError(Object[] parameters) throws PlatformException {
 
-        System.err.println(">>>>>>>>>>" + messageObj);
+        Iterable<Map.Entry<String, String>> head = (Iterable<Entry<String, String>>) parameters[0];
+        Map<String, List<String>> parameterMap = (Map<String, List<String>>) parameters[1];
+        String path = (String) parameters[2];
+        String message = (String) parameters[3];
+        System.err.println(">>>>>>>>>>" + message);
         return "OK";
     }
 }

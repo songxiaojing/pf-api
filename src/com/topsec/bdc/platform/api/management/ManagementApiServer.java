@@ -1,6 +1,6 @@
 package com.topsec.bdc.platform.api.management;
 
-import com.topsec.bdc.platform.api.http.snoop.server.HttpSnoopServer;
+import com.topsec.bdc.platform.api.server.http.HttpSnoopServer;
 
 
 public class ManagementApiServer extends HttpSnoopServer {
