@@ -18,14 +18,13 @@ public class HttpClientReferent extends ClientReferent {
     @Override
     public IResponseListener getClientResponseListener() {
 
-        // TODO Auto-generated method stub
-        return null;
+        return _clientResponseListener;
     }
 
     @Override
     public void setClientResponseListener(IResponseListener listener) {
 
-        // TODO Auto-generated method stub
+        this._clientResponseListener = listener;
 
     }
 

@@ -3,6 +3,7 @@ package com.topsec.bdc.platform.api.client.http;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -23,6 +24,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.topsec.bdc.platform.api.client.ClientReferent;
+import com.topsec.bdc.platform.api.client.IClient;
 import com.topsec.bdc.platform.core.exception.PlatformException;
 import com.topsec.bdc.platform.core.utils.Assert;
 
@@ -40,9 +43,9 @@ import com.topsec.bdc.platform.core.utils.Assert;
  * @date Jul 17, 2015
  * 
  */
-public final class HttpSnoopClient {
+public class HttpSnoopClient implements IClient {
 
-    private final HttpClientReferent _httpClientConfiguration;
+    private ClientReferent _httpClientReferent;
     private SslContext sslCtx = null;
     private EventLoopGroup _group = null;
     private Bootstrap _clientBootstrap = null;
@@ -53,9 +56,8 @@ public final class HttpSnoopClient {
     public String _method = "GET";
     public String _content = null;
 
-    public HttpSnoopClient(HttpClientReferent httpClientConfiguration) {
+    public HttpSnoopClient() {
 
-        _httpClientConfiguration = httpClientConfiguration;
     }
 
     /**
@@ -93,23 +95,23 @@ public final class HttpSnoopClient {
     public void start() throws Exception {
 
         // identify the client configuration object
-        if (this._httpClientConfiguration == null) {
+        if (this._httpClientReferent == null) {
             throw new PlatformException("Client clientConfiguration is invalid");
         }
         // if has a host.
-        if (Assert.isEmptyString(this._httpClientConfiguration._serverIpAddress) == true) {
+        if (Assert.isEmptyString(this._httpClientReferent._serverIpAddress) == true) {
             throw new Exception("invalid _endPointHost.");
         }
 
-        if (this._httpClientConfiguration._serverPort <= 1024) {
-            throw new PlatformException("HttpClientConfiguration._serverPort is invalid,port should be over 1024.");
+        if (this._httpClientReferent._serverPort <= 1024) {
+            //throw new PlatformException("HttpClientConfiguration._serverPort is invalid,port should be over 1024.");
         }
         //        if (this._httpClientConfiguration._responseListener == null) {
         //            this._httpClientConfiguration._responseListener = new SimpleResponseListener();
         //        }
         //
 
-        if (_httpClientConfiguration._enableSSL == true) {
+        if (_httpClientReferent._enableSSL == true) {
             sslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         } else {
             sslCtx = null;
@@ -128,7 +130,7 @@ public final class HttpSnoopClient {
             }
             // Prepare the HTTP request.
             DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, httpMethod, "/", Unpooled.copiedBuffer(_content, CharsetUtil.UTF_8));
-            request.headers().set(HttpHeaders.Names.HOST, _httpClientConfiguration._serverIpAddress);
+            request.headers().set(HttpHeaders.Names.HOST, _httpClientReferent._serverIpAddress);
             request.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE);
             request.headers().set(HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Values.GZIP);
             request.headers().set(HttpHeaders.Names.CONTENT_LENGTH, request.content().readableBytes());
@@ -143,14 +145,20 @@ public final class HttpSnoopClient {
             }
 
             //
-            _group = new NioEventLoopGroup();
+            _group = new NioEventLoopGroup(_httpClientReferent._eventGroupSize);
             _clientBootstrap = new Bootstrap();
+            //
+            //
+            if (_httpClientReferent._enableTimeout == true) {
+                _clientBootstrap.option(ChannelOption.TCP_NODELAY, true);
+                _clientBootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, _httpClientReferent._connectTimeoutMillis);
+            }
             _clientBootstrap.group(_group);
             _clientBootstrap.channel(NioSocketChannel.class);
-            _clientBootstrap.handler(new HttpSnoopClientInitializer(sslCtx, _httpClientConfiguration));
+            _clientBootstrap.handler(new HttpSnoopClientInitializer(sslCtx, _httpClientReferent));
 
             // Make the connection attempt.
-            _channel = _clientBootstrap.connect(this._httpClientConfiguration._serverIpAddress, _httpClientConfiguration._serverPort).sync().channel();
+            _channel = _clientBootstrap.connect(this._httpClientReferent._serverIpAddress, _httpClientReferent._serverPort).sync().channel();
 
             // Send the HTTP request.
             _channel.writeAndFlush(request);
@@ -166,5 +174,26 @@ public final class HttpSnoopClient {
                 _group.shutdownGracefully();
             }
         }
+    }
+
+    @Override
+    public void stop() throws Exception {
+
+        if (_group != null) {
+            _group.shutdownGracefully();
+        }
+
+    }
+
+    @Override
+    public void setClientReferent(ClientReferent clientReferent) {
+
+        this._httpClientReferent = clientReferent;
+    }
+
+    @Override
+    public ClientReferent getClientReferent() {
+
+        return this._httpClientReferent;
     }
 }

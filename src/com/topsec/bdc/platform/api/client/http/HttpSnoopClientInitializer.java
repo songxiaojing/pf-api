@@ -6,6 +6,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+
+import com.topsec.bdc.platform.api.client.ClientReferent;
 
 
 /**
@@ -25,12 +29,12 @@ public class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel
 
     private final SslContext sslCtx;
 
-    private final HttpClientReferent _httpClientConfiguration;
+    private final ClientReferent _clientReferent;
 
-    public HttpSnoopClientInitializer(SslContext sslCtx, HttpClientReferent httpClientConfiguration) {
+    public HttpSnoopClientInitializer(SslContext sslCtx, ClientReferent httpClientConfiguration) {
 
         this.sslCtx = sslCtx;
-        this._httpClientConfiguration = httpClientConfiguration;
+        this._clientReferent = httpClientConfiguration;
     }
 
     @Override
@@ -42,7 +46,12 @@ public class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel
         if (sslCtx != null) {
             p.addLast(sslCtx.newHandler(ch.alloc()));
         }
-
+        //timeout
+        if (_clientReferent._enableTimeout) {
+            p.addLast("readTimeoutHandler", new ReadTimeoutHandler(_clientReferent._readTimeoutSecond));
+            p.addLast("writeTimeoutHandler", new WriteTimeoutHandler(_clientReferent._writeTimeoutSecond));
+        }
+        //
         p.addLast(new HttpClientCodec());
 
         // Remove the following line if you don't want automatic content decompression.
@@ -51,6 +60,6 @@ public class HttpSnoopClientInitializer extends ChannelInitializer<SocketChannel
         // Uncomment the following line if you don't want to handle HttpContents.
         //p.addLast(new HttpObjectAggregator(1048576));
 
-        p.addLast(new HttpSnoopClientHandler(_httpClientConfiguration));
+        p.addLast(new HttpSnoopClientHandler(_clientReferent));
     }
 }

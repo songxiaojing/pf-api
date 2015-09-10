@@ -32,10 +32,14 @@ public abstract class ServerReferent implements IConfiguration {
     public int _bossGroupSize = 100;
     @XmlElement(name = "workerGroupSize", type = Integer.class, defaultValue = "100")
     public int _workerGroupSize = 100;
-    @XmlElement(name = "enableTimeout", type = Boolean.class)
+    @XmlElement(name = "enableTimeout", type = Boolean.class, defaultValue = "true")
     public boolean _enableTimeout = true;
-    @XmlElement(name = "timeout", type = Integer.class)
-    public Integer _timeout = 100000;
+    @XmlElement(name = "soTimeout", type = Integer.class)
+    public Integer _soTimeout = 100000;
+    @XmlElement(name = "readTimeoutSecond", type = Integer.class)
+    public int _readTimeoutSecond = 3;
+    @XmlElement(name = "writeTimeoutSecond", type = Integer.class)
+    public int _writeTimeoutSecond = 3;
     //
     @XmlElement(name = "enableSSL", type = Boolean.class)
     public boolean _enableSSL = false;

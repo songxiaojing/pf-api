@@ -92,7 +92,7 @@ public abstract class HttpSnoopServer extends AbstractMetricMBean implements ISe
             _bootstrap.childHandler(new HttpSnoopServerInitializer(sslCtx, _serverConfig));
             //
             if (_serverConfig._enableTimeout == true) {
-                _bootstrap.option(ChannelOption.SO_TIMEOUT, _serverConfig._timeout);
+                _bootstrap.option(ChannelOption.SO_TIMEOUT, _serverConfig._soTimeout);
             }
             _bootstrap.option(ChannelOption.SO_KEEPALIVE, false);
             //

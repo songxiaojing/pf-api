@@ -9,6 +9,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.CharsetUtil;
 
+import com.topsec.bdc.platform.api.client.ClientReferent;
+import com.topsec.bdc.platform.api.client.IResponseListener;
 import com.topsec.bdc.platform.core.exception.PlatformException;
 
 
@@ -16,11 +18,11 @@ public class HttpSnoopClientHandler extends SimpleChannelInboundHandler<HttpObje
 
     private final StringBuilder _responseBodyBuf = new StringBuilder();
 
-    private final HttpClientReferent _httpClientConfiguration;
+    private final ClientReferent _httpClientReferent;
 
-    public HttpSnoopClientHandler(HttpClientReferent httpClientConfiguration) {
+    public HttpSnoopClientHandler(ClientReferent httpClientConfiguration) {
 
-        _httpClientConfiguration = httpClientConfiguration;
+        _httpClientReferent = httpClientConfiguration;
     }
 
     @Override
@@ -55,6 +57,7 @@ public class HttpSnoopClientHandler extends SimpleChannelInboundHandler<HttpObje
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
+        cause.printStackTrace();
         fireError(new PlatformException("exceptionCaught", cause));
         ctx.close();
     }
@@ -64,9 +67,10 @@ public class HttpSnoopClientHandler extends SimpleChannelInboundHandler<HttpObje
      */
     private void fireError(PlatformException exception) {
 
-        if (_httpClientConfiguration._clientResponseListener != null) {
+        IResponseListener listener = _httpClientReferent.getClientResponseListener();
+        if (listener != null) {
             try {
-                _httpClientConfiguration._clientResponseListener.fireError(new Object[] { exception.toString() });
+                listener.fireError(new Object[] { exception.toString() });
             } catch (PlatformException e) {
                 e.printStackTrace();
             }
@@ -78,9 +82,10 @@ public class HttpSnoopClientHandler extends SimpleChannelInboundHandler<HttpObje
      */
     private void fireSucceed(String content) {
 
-        if (_httpClientConfiguration._clientResponseListener != null) {
+        IResponseListener listener = _httpClientReferent.getClientResponseListener();
+        if (listener != null) {
             try {
-                _httpClientConfiguration._clientResponseListener.fireSucceed(new Object[] { content });
+                listener.fireSucceed(new Object[] { content });
             } catch (PlatformException e) {
                 e.printStackTrace();
             }

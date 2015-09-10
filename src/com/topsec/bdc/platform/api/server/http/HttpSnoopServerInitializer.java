@@ -1,7 +1,5 @@
 package com.topsec.bdc.platform.api.server.http;
 
-import com.topsec.bdc.platform.api.server.ServerReferent;
-
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -9,6 +7,10 @@ import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+
+import com.topsec.bdc.platform.api.server.ServerReferent;
 
 
 /**
@@ -33,12 +35,12 @@ public class HttpSnoopServerInitializer extends ChannelInitializer<SocketChannel
     /**
      * 服务器配置实例.
      */
-    private final ServerReferent _serverConfig;
+    private final ServerReferent _serverReferent;
 
     public HttpSnoopServerInitializer(SslContext sslCtx, ServerReferent serverConfig) {
 
         this._sslCtx = sslCtx;
-        this._serverConfig = serverConfig;
+        this._serverReferent = serverConfig;
     }
 
     @Override
@@ -49,18 +51,24 @@ public class HttpSnoopServerInitializer extends ChannelInitializer<SocketChannel
         if (_sslCtx != null) {
             p.addLast(_sslCtx.newHandler(ch.alloc()));
         }
+
+        //timeout
+        if (_serverReferent._enableTimeout == true) {
+            p.addLast("readTimeoutHandler", new ReadTimeoutHandler(_serverReferent._readTimeoutSecond));
+            p.addLast("writeTimeoutHandler", new WriteTimeoutHandler(_serverReferent._writeTimeoutSecond));
+        }
         p.addLast(new HttpRequestDecoder());
         // Uncomment the following line if you don't want to handle HttpChunks.
         //p.addLast(new HttpObjectAggregator(1048576));
         p.addLast(new HttpResponseEncoder());
         //
-        if (_serverConfig._enableCompressor == true) {
+        if (_serverReferent._enableCompressor == true) {
             // Remove the following line if you don't want automatic content compression.
             //And response chunked or not
             p.addLast(new HttpContentCompressor());
         }
         //加入业务支持处理Handler
-        p.addLast(new HttpSnoopServerHandler(_serverConfig));
+        p.addLast(new HttpSnoopServerHandler(_serverReferent));
         //
 
     }

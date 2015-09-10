@@ -17,10 +17,11 @@ public abstract class ClientReferent implements IConfiguration {
     //
     public String _serverIpAddress = null;
     public int _serverPort = 50000;
-    public int _bossGroupSize = 100;
-    public int _workerGroupSize = 100;
+    public int _eventGroupSize = 5;
     public boolean _enableTimeout = true;
-    public Integer _timeout = 100000;
+    public Integer _connectTimeoutMillis = 100000;
+    public int _readTimeoutSecond = 3;
+    public int _writeTimeoutSecond = 3;
     //
     public boolean _enableSSL = false;
     public boolean _enableCompressor = false;
