@@ -1,6 +1,7 @@
 package com.topsec.bdc.platform.api.services;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -33,13 +34,13 @@ import com.topsec.bdc.platform.log.PlatformLogger;
  */
 public class APIEngineService extends AbstractMetricMBean implements IService {
 
-    final public static String HANDLER_CONF_TITLE = "handler";
+    final public static String LISTENER_CONF_TITLE = "listener";
     final public static String REFERENT_CONF_TITLE = "serverReferent";
-    final public static String SERVER_CONF_TITLE = "com.topsec.bdc.platform.api.platformApiServer";
+    final public static String SERVER_CONF_TITLE = "pf-api.platformApiServer";
 
     final private static PlatformLogger theLogger = PlatformLogger.getLogger(APIEngineService.class);
 
-    public ArrayList<IServer> apiServersList = new ArrayList<IServer>();
+    private ArrayList<IServer> _apiServersList = new ArrayList<IServer>();
 
     @Override
     public void start() throws Exception {
@@ -102,29 +103,24 @@ public class APIEngineService extends AbstractMetricMBean implements IService {
                         propertyLoaderService.loadExtensionProperties(serverReferemtElement.getChildren(IConfiguration.PROPERTY_CONF_TITLE), serverReferent);
                         //
                         //Level #3 handler
-                        IConfigurationElement[] handlerConfig = serverReferemtElement.getChildren(HANDLER_CONF_TITLE);
-                        if (handlerConfig != null && handlerConfig.length != 0) {
-                            for (IConfigurationElement handlerElement : handlerConfig) {
-                                IRequestListener handler = (IRequestListener) handlerElement.createExecutableExtension(IConfiguration.IMPLEMENT_CLASS_CONF_TITLE);
+                        IConfigurationElement[] listenerConfig = serverReferemtElement.getChildren(LISTENER_CONF_TITLE);
+                        if (listenerConfig != null && listenerConfig.length != 0) {
+                            for (IConfigurationElement listenerElement : listenerConfig) {
                                 //
-                                handler.setID(handlerElement.getAttribute(IConfiguration.ID_CONF_TITLE));
-                                handler.setName(handlerElement.getAttribute(IConfiguration.NAME_CONF_TITLE));
-                                handler.setDescription(handlerElement.getAttribute(IConfiguration.DESCRIPTION_CONF_TITLE));
+                                serverReferent.addRequestListener(listenerElement.getAttribute(IConfiguration.NAME_CONF_TITLE), (IRequestListener) listenerElement.createExecutableExtension(IConfiguration.IMPLEMENT_CLASS_CONF_TITLE));
                                 //
-                                propertyLoaderService.loadExtensionProperties(handlerElement.getChildren(IConfiguration.PROPERTY_CONF_TITLE), handler);
-                                serverReferent.setRequestListener(handler);
-                                //
-                                theLogger.info("configureHandler", server.getName(), serverReferent.getName(), handler.getName());
+                                theLogger.info("bundleListener", listenerElement.getAttribute(IConfiguration.NAME_CONF_TITLE), server.getName());
                             }
                         }
                         server.setHttpServerReferent(serverReferent);
-                        theLogger.info("configureServerReferent", server.getName(), serverReferent.getName());
+                        theLogger.info("bundleServerReferent", serverReferent.getName(), server.getName(), serverReferent.getServerIpAddress(), serverReferent.getServerPort());
                     }
                 }
                 //
                 theLogger.info("configureServer", server.getID(), server.getName(), server.getDescription());
                 //
                 configServerList.add(server);
+                theLogger.info("=================================================================");
             } catch (CoreException e1) {
                 theLogger.exception(e1);
             } catch (Throwable t) {
@@ -136,7 +132,7 @@ public class APIEngineService extends AbstractMetricMBean implements IService {
             try {
                 IServer server = configServerList.get(i);
                 server.start();
-                this.apiServersList.add(server);
+                this._apiServersList.add(server);
                 if (server instanceof IService) {
                     ServiceHelper.registerService((IService) server, false, false);
                 }
@@ -152,8 +148,8 @@ public class APIEngineService extends AbstractMetricMBean implements IService {
      */
     private void shutdownServers() {
 
-        for (int i = 0; i < apiServersList.size(); i++) {
-            final IServer targetServer = apiServersList.get(i);
+        for (int i = 0; i < _apiServersList.size(); i++) {
+            final IServer targetServer = _apiServersList.get(i);
             new Thread() {
 
                 public void run() {
@@ -166,5 +162,10 @@ public class APIEngineService extends AbstractMetricMBean implements IService {
                 }
             }.start();
         }
+    }
+
+    public List<IServer> getApiServersList() {
+
+        return _apiServersList;
     }
 }

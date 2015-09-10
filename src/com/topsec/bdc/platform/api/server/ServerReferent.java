@@ -20,6 +20,9 @@ import com.topsec.bdc.platform.core.services.IConfiguration;
  */
 public abstract class ServerReferent implements IConfiguration {
 
+    public String _id = null;
+    public String _name = null;
+    public String _description = null;
     //
     @XmlElement(name = "serverIpAddress", type = String.class)
     public String _serverIpAddress = null;
@@ -40,8 +43,56 @@ public abstract class ServerReferent implements IConfiguration {
     public boolean _enableCompressor = false;
     //
     public long _requestTotal = 0;
-    //
-    public IRequestListener _requestListener = null;
 
-    abstract public void setRequestListener(IRequestListener handler);
+    //
+    public abstract void addRequestListener(String name, IRequestListener listener);
+
+    public abstract IRequestListener getResquestListener(String name);
+
+    @Override
+    public String getDescription() {
+
+        return this._description;
+    }
+
+    @Override
+    public String getName() {
+
+        return this._name;
+    }
+
+    @Override
+    public void setName(String name) {
+
+        this._name = name;
+    }
+
+    @Override
+    public void setDescription(String description) {
+
+        this._description = description;
+    }
+
+    @Override
+    public void setID(String id) {
+
+        this._id = id;
+    }
+
+    @Override
+    public String getID() {
+
+        return this._id;
+    }
+
+    public String getServerIpAddress() {
+
+        return _serverIpAddress;
+    }
+
+    public int getServerPort() {
+
+        return _serverPort;
+    }
+
 }

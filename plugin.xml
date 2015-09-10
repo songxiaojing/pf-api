@@ -2,18 +2,16 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="platformApiServer" name="platformApi" schema="schema/pfApiServer.exsd"/>
-   <extension point="com.topsec.bdc.platform.api.platformApiServer">
-   </extension>
    <extension
-         point="com.topsec.bdc.platform.api.platformApiServer">
+         point="pf-api.platformApiServer">
       <server
             description="management api for platform."
             id="pf-api.management"
             implement_class="com.topsec.bdc.platform.api.management.ManagementApiServer"
-            name="management">
+            name="managementApi">
          <serverReferent
-               implement_class="com.topsec.bdc.platform.api.management.ManagementServerReferent"
-               name="pf-api.serverReferent">
+               implement_class="com.topsec.bdc.platform.api.server.http.HttpSoopServerReferent"
+               name="HttpSoopServerReferent">
             <property
                   name="serverIpAddress"
                   value="127.0.0.1">
@@ -22,16 +20,10 @@
                   name="serverPort"
                   value="50001">
             </property>
-            <handler
-                  description="dsdfsdf"
-                  id="pf-api.handler2"
+            <listener
                   implement_class="com.topsec.bdc.platform.api.management.ManagementRequestListener"
-                  name="pf-api.handler2">
-               <property
-                     name="name"
-                     value="/abc/">
-               </property>
-            </handler>
+                  name="/">
+            </listener>
          </serverReferent>
       </server>
    </extension>

@@ -111,11 +111,8 @@
       </complexType>
    </element>
 
-   <element name="handler">
+   <element name="listener">
       <complexType>
-         <sequence minOccurs="1" maxOccurs="30">
-            <element ref="property" minOccurs="1" maxOccurs="20"/>
-         </sequence>
          <attribute name="implement_class" type="string" use="required">
             <annotation>
                <documentation>
@@ -126,21 +123,7 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="id" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
          <attribute name="name" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="description" type="string">
             <annotation>
                <documentation>
                   
@@ -154,7 +137,7 @@
       <complexType>
          <sequence minOccurs="1" maxOccurs="30">
             <element ref="property" minOccurs="1" maxOccurs="20"/>
-            <element ref="handler"/>
+            <element ref="listener"/>
          </sequence>
          <attribute name="implement_class" type="string">
             <annotation>

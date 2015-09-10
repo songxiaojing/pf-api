@@ -1,86 +1,59 @@
 package com.topsec.bdc.platform.api.management;
 
-import io.netty.handler.codec.http.HttpHeaders;
-
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlElement;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import com.topsec.bdc.platform.api.server.IRequestListener;
+import com.topsec.bdc.platform.api.server.IServer;
+import com.topsec.bdc.platform.api.server.http.HttpSoopRequestListener;
+import com.topsec.bdc.platform.api.services.APIEngineService;
+import com.topsec.bdc.platform.core.services.ServiceHelper;
 
 
-public class ManagementRequestListener implements IRequestListener {
+public class ManagementRequestListener extends HttpSoopRequestListener {
 
-    public String _id = null;
-    public String _name = null;
-    public String _description = null;
-
-    @XmlElement(name = "name", type = String.class)
-    public String name = null;
+    private static APIEngineService aPIEngineService = null;
 
     public ManagementRequestListener() {
 
     }
 
     @Override
-    public String fireSucceed(Object messageObj) throws Exception {
+    public String fireSucceed(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception {
 
-        System.out.println(name + ">>>>>>>>>>" + messageObj);
-        return "OK";
+        if (aPIEngineService == null) {
+            aPIEngineService = ServiceHelper.findService(APIEngineService.class);
+            if (aPIEngineService == null) {
+                return "{message:\"APIEngineService is not ready.\"}";
+            }
+        }
+
+        JSONArray apiArray = new JSONArray();
+        List<IServer> httpServerList = aPIEngineService.getApiServersList();
+
+        if (httpServerList != null) {
+            for (int i = 0; i < httpServerList.size(); i++) {
+                JSONObject apiObject = new JSONObject();
+                IServer server = httpServerList.get(i);
+                if (server == null) {
+                    continue;
+                }
+                apiObject.put("name", server.getName());
+                apiObject.put("id", server.getID());
+                apiObject.put("desc", server.getDescription());
+                apiArray.put(apiObject);
+            }
+        }
+
+        return apiArray.toString();
     }
 
     @Override
-    public String fireError(Object messageObj) throws Exception {
+    public String fireError(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception {
 
         System.err.println(">>>>>>>>>>" + messageObj);
         return "OK";
     }
-
-    @Override
-    public void setHttpHeader(HttpHeaders headers) {
-
-    }
-
-    @Override
-    public void setHttpParameter(Map<String, List<String>> params) {
-
-    }
-
-    @Override
-    public String getDescription() {
-
-        return this._description;
-    }
-
-    @Override
-    public String getName() {
-
-        return this._name;
-    }
-
-    @Override
-    public void setName(String name) {
-
-        this._name = name;
-    }
-
-    @Override
-    public void setDescription(String description) {
-
-        this._description = description;
-    }
-
-    @Override
-    public void setID(String id) {
-
-        this._id = id;
-    }
-
-    @Override
-    public String getID() {
-
-        return this._id;
-    }
-
 }

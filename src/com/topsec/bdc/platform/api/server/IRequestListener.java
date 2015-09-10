@@ -1,7 +1,5 @@
 package com.topsec.bdc.platform.api.server;
 
-import io.netty.handler.codec.http.HttpHeaders;
-
 import java.util.List;
 import java.util.Map;
 
@@ -13,11 +11,7 @@ import com.topsec.bdc.platform.core.services.IConfiguration;
  */
 public interface IRequestListener extends IConfiguration {
 
-    public String fireSucceed(Object messageObj) throws Exception;
+    public String fireSucceed(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception;
 
-    public String fireError(Object messageObj) throws Exception;
-
-    public void setHttpHeader(HttpHeaders headers);
-
-    public void setHttpParameter(Map<String, List<String>> params);
+    public String fireError(Object messageObj, Map<String, List<String>> parameterMap, String path, String message) throws Exception;
 }

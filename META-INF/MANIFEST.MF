@@ -1,13 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: pf-api
-Bundle-SymbolicName: com.topsec.bdc.platform.api;singleton:=true
+Bundle-SymbolicName: pf-api;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.topsec.bdc.platform.api.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: topsec
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/json.jar,
+ lib/jzlib-1.1.3.jar
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.9.100",
  pf-log;bundle-version="1.0.0",
  pf-core;bundle-version="1.0.0",
@@ -17,3 +19,25 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.9.100",
  io.netty.common;bundle-version="4.0.29",
  io.netty.handler;bundle-version="4.0.29",
  io.netty.transport;bundle-version="4.0.29"
+Export-Package: com.topsec.bdc.platform.api,
+ com.topsec.bdc.platform.api.client,
+ com.topsec.bdc.platform.api.http.snoop.client,
+ com.topsec.bdc.platform.api.http.snoop.server,
+ com.topsec.bdc.platform.api.management,
+ com.topsec.bdc.platform.api.server,
+ com.topsec.bdc.platform.api.server.http,
+ com.topsec.bdc.platform.api.services,
+ com.topsec.bdc.platform.api.test,
+ com.topsec.bdc.platform.api.test.discard,
+ com.topsec.bdc.platform.api.test.echo,
+ com.topsec.bdc.platform.api.test.file,
+ com.topsec.bdc.platform.api.test.http.cors,
+ com.topsec.bdc.platform.api.test.http.file,
+ com.topsec.bdc.platform.api.test.http.helloworld,
+ com.topsec.bdc.platform.api.test.http.snoop,
+ com.topsec.bdc.platform.api.test.http.upload,
+ com.topsec.bdc.platform.api.test.http.websocketx.benchmarkserver,
+ com.topsec.bdc.platform.api.test.http.websocketx.client,
+ com.topsec.bdc.platform.api.test.http.websocketx.server,
+ com.topsec.bdc.platform.api.utils,
+ com.topsec.bdc.platform.api.utils.http

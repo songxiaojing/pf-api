@@ -1,20 +1,14 @@
-package com.topsec.bdc.platform.api.management;
+package com.topsec.bdc.platform.api.server.http;
 
 import com.topsec.bdc.platform.api.server.IRequestListener;
-import com.topsec.bdc.platform.api.server.ServerReferent;
 
 
-public class ManagementServerReferent extends ServerReferent {
 
-    //
+public abstract class HttpSoopRequestListener implements IRequestListener {
+
     public String _id = null;
     public String _name = null;
     public String _description = null;
-
-    public ManagementServerReferent() {
-
-        // TODO Auto-generated constructor stub
-    }
 
     @Override
     public String getDescription() {
@@ -52,10 +46,4 @@ public class ManagementServerReferent extends ServerReferent {
         return this._id;
     }
 
-    @Override
-    public void setRequestListener(IRequestListener handler) {
-
-        this._requestListener = handler;
-
-    }
 }

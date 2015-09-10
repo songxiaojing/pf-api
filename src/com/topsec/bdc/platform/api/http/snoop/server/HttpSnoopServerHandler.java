@@ -18,15 +18,16 @@ package com.topsec.bdc.platform.api.http.snoop.server;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static io.netty.handler.codec.http.HttpHeaders.Names.COOKIE;
+import static io.netty.handler.codec.http.HttpHeaders.Names.SET_COOKIE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
-import com.topsec.bdc.platform.api.server.ServerReferent;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.Cookie;
+import io.netty.handler.codec.http.CookieDecoder;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
@@ -35,7 +36,16 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.topsec.bdc.platform.api.server.IRequestListener;
+import com.topsec.bdc.platform.api.server.ServerReferent;
+import com.topsec.bdc.platform.core.utils.Assert;
 
 
 public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> {
@@ -44,11 +54,15 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
     /** Buffer that stores the response content */
     private final StringBuilder _requestBodyBuf = new StringBuilder();
 
-    private final ServerReferent _serverConfig;
+    private final ServerReferent _serverReferent;
 
-    public HttpSnoopServerHandler(ServerReferent serverConfig) {
+    private HttpRequest _request = null;
 
-        this._serverConfig = serverConfig;
+    private HttpResponseStatus _responseStatus = null;
+
+    public HttpSnoopServerHandler(ServerReferent serverReferent) {
+
+        this._serverReferent = serverReferent;
     }
 
     @Override
@@ -61,13 +75,39 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
 
         if (msg instanceof HttpRequest) {
-            System.out.println("handler:" + this.hashCode());
             //HttpRequest request = this._request = (HttpRequest) msg;
-            HttpRequest request = (HttpRequest) msg;
+            this._request = (HttpRequest) msg;
             //
-            this._serverConfig._requestListener.setHttpHeader(request.headers());
-            this._serverConfig._requestListener.setHttpParameter(new QueryStringDecoder(request.getUri()).parameters());
             _requestBodyBuf.setLength(0);
+            /*
+            System.out.println("===================================\r\n");
+
+            System.out.println("VERSION: " + request.getProtocolVersion());
+            System.out.println("HOSTNAME: " + HttpHeaders.getHost(request, "unknown"));
+            System.out.println("REQUEST_URI: " + request.getUri());
+
+            HttpHeaders headers = request.headers();
+            if (!headers.isEmpty()) {
+                for (Map.Entry<String, String> h : headers) {
+                    String key = h.getKey();
+                    String value = h.getValue();
+                    System.out.println("HEADER: " + key + " = " + value);
+                }
+            }
+
+            Map<String, List<String>> params = queryStringDecoder.parameters();
+            if (!params.isEmpty()) {
+                for (Entry<String, List<String>> p : params.entrySet()) {
+                    String key = p.getKey();
+                    List<String> vals = p.getValue();
+                    for (String val : vals) {
+                        System.out.println("PARAM: " + key + " = " + val);
+                    }
+                }
+            }
+            //
+            System.out.println("===================================");
+            */
 
         }
 
@@ -86,25 +126,24 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
                 //
                 String responseContent = null;
                 //
-                HttpResponseStatus responseStatus = null;
                 //fill response
                 if (trailer.getDecoderResult().isSuccess() == false) {
-                    responseStatus = HttpResponseStatus.BAD_REQUEST;
+                    _responseStatus = HttpResponseStatus.BAD_REQUEST;
                     responseContent = HttpResponseStatus.BAD_REQUEST.reasonPhrase();
                 } else {
                     try {
-                        responseStatus = HttpResponseStatus.OK;
-                        responseContent = this._serverConfig._requestListener.fireSucceed(_requestBodyBuf.toString());
+                        _responseStatus = HttpResponseStatus.OK;
+                        responseContent = fireListenerSucceed(_requestBodyBuf.toString());
                     } catch (Throwable e) {
                         e.printStackTrace();
-                        responseStatus = HttpResponseStatus.SERVICE_UNAVAILABLE;
+                        _responseStatus = HttpResponseStatus.SERVICE_UNAVAILABLE;
                         responseContent = e.toString();
                     }
                 }
 
                 try {
                     //send back response and close connection
-                    writeResponseAndClose(ctx, responseStatus, responseContent);
+                    writeResponseAndClose(ctx, responseContent);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -118,13 +157,16 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
         cause.printStackTrace();
+
         try {
-            this._serverConfig._requestListener.fireError(cause);
-        } catch (Throwable e) {
+            fireListenerError(cause);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         //
-        writeResponseAndClose(ctx, HttpResponseStatus.SERVICE_UNAVAILABLE, cause.toString());
+        this._responseStatus = HttpResponseStatus.SERVICE_UNAVAILABLE;
+        writeResponseAndClose(ctx, cause.toString());
+
     }
 
     /**
@@ -134,12 +176,18 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
      * @param responseStatus
      * @param responseContent
      */
-    private void writeResponseAndClose(ChannelHandlerContext ctx, HttpResponseStatus responseStatus, String responseContent) {
+    private void writeResponseAndClose(ChannelHandlerContext ctx, String message) {
 
-        ByteBuf responseContentBuf = Unpooled.copiedBuffer(responseContent, CharsetUtil.UTF_8);
+        //System.out.println("handler:" + this.hashCode() + ">>" + this._serverConfig._requestListener.hashCode());
+        ByteBuf responseContentBuf = null;
+        if (Assert.isEmptyString(message) == true) {
+            responseContentBuf = Unpooled.copiedBuffer(_responseStatus.reasonPhrase(), CharsetUtil.UTF_8);
+        } else {
+            responseContentBuf = Unpooled.copiedBuffer(message, CharsetUtil.UTF_8);
+        }
         // Decide whether to close the connection or not.
         // Build the response object.
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, responseStatus, responseContentBuf);
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, _responseStatus, responseContentBuf);
         //
         response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");
         //disallow keepAlive
@@ -150,7 +198,6 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
         // Add keep alive header as per:
         // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
         response.headers().set(CONNECTION, HttpHeaders.Values.CLOSE);
-        /*
         // Encode the cookie.
         String cookieString = _request.headers().get(COOKIE);
         if (cookieString != null) {
@@ -163,10 +210,9 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
             }
         } else {
             // Browser sent no cookie.  Add some.
-            response.headers().add(SET_COOKIE, ServerCookieEncoder.encode("key1", "value1"));
-            response.headers().add(SET_COOKIE, ServerCookieEncoder.encode("key2", "value2"));
+            //response.headers().add(SET_COOKIE, ServerCookieEncoder.encode("key1", "value1"));
+            //response.headers().add(SET_COOKIE, ServerCookieEncoder.encode("key2", "value2"));
         }
-        */
         try {
             // Write the response.
             ctx.write(response);
@@ -176,5 +222,30 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
             t.printStackTrace();
             ctx.close();
         }
+    }
+
+    private String fireListenerSucceed(String message) throws Exception {
+
+        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(this._request.getUri());
+
+        String path = queryStringDecoder.path();
+        if (Assert.isEmptyString(path) == true) {
+            path = "/";
+        }
+        Map<String, List<String>> parameterMap = queryStringDecoder.parameters();
+        Iterable<Map.Entry<String, String>> headerMap = this._request.headers();
+        IRequestListener listener = this._serverReferent.getResquestListener(path);
+
+        if (listener != null) {
+            return listener.fireSucceed(headerMap, parameterMap, path, message);
+        } else {
+            this._responseStatus = HttpResponseStatus.NOT_FOUND;
+            return null;
+        }
+    }
+
+    private String fireListenerError(Throwable cause) throws Exception {
+
+        return cause.toString();
     }
 }

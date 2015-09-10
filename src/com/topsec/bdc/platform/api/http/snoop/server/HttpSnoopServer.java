@@ -1,7 +1,6 @@
 package com.topsec.bdc.platform.api.http.snoop.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -99,9 +98,9 @@ public abstract class HttpSnoopServer extends AbstractMetricMBean implements ISe
             //
             channelFuture = _bootstrap.bind(inetAddress);
             channelFuture.sync();
-            Channel ch = channelFuture.channel();
+            //Channel ch = channelFuture.channel();
 
-            System.err.println("Open your web browser and navigate to " + (this._serverConfig._enableSSL ? "https" : "http") + "://" + this._serverConfig._serverIpAddress + ":" + this._serverConfig._serverPort + '/');
+            theLogger.info("startHttpServer", this.getName(), (this._serverConfig._enableSSL ? "HTTPS" : "HTTP"), this._serverConfig._serverIpAddress, this._serverConfig._serverPort);
 
             //ch.closeFuture().sync();
         } catch (Throwable t) {
