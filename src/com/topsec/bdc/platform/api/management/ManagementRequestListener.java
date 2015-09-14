@@ -1,8 +1,6 @@
 package com.topsec.bdc.platform.api.management;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,10 +31,10 @@ public class ManagementRequestListener extends HttpSoopRequestListener {
             }
         }
 
-        Iterable<Map.Entry<String, String>> head = (Iterable<Entry<String, String>>) parameters[0];
-        Map<String, List<String>> parameterMap = (Map<String, List<String>>) parameters[1];
-        String path = (String) parameters[2];
-        String message = (String) parameters[3];
+        //        Iterable<Map.Entry<String, String>> head = (Iterable<Entry<String, String>>) parameters[0];
+        //        Map<String, List<String>> parameterMap = (Map<String, List<String>>) parameters[1];
+        //        String path = (String) parameters[2];
+        //        String message = (String) parameters[3];
         JSONArray apiArray = new JSONArray();
         List<IServer> httpServerList = aPIEngineService.getApiServersList();
 
@@ -66,9 +64,9 @@ public class ManagementRequestListener extends HttpSoopRequestListener {
     @Override
     public String fireError(Object[] parameters) throws PlatformException {
 
-        Iterable<Map.Entry<String, String>> head = (Iterable<Entry<String, String>>) parameters[0];
-        Map<String, List<String>> parameterMap = (Map<String, List<String>>) parameters[1];
-        String path = (String) parameters[2];
+        //        Iterable<Map.Entry<String, String>> head = (Iterable<Entry<String, String>>) parameters[0];
+        //        Map<String, List<String>> parameterMap = (Map<String, List<String>>) parameters[1];
+        //        String path = (String) parameters[2];
         String message = (String) parameters[3];
         System.err.println(">>>>>>>>>>" + message);
         return "OK";

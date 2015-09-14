@@ -26,8 +26,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.Cookie;
-import io.netty.handler.codec.http.CookieDecoder;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
@@ -36,7 +34,9 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.ServerCookieEncoder;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 
 import java.util.List;
@@ -48,9 +48,21 @@ import com.topsec.bdc.platform.api.server.ServerReferent;
 import com.topsec.bdc.platform.core.utils.Assert;
 
 
+/**
+ * 
+ * HTTP API服务事件处理器.
+ * 
+ * 在此处理器中对业务的请求响应监听器进行消息的封装与触发.
+ * 
+ * @title HttpSnoopServerHandler
+ * @package com.topsec.bdc.platform.api.server.http
+ * @author baiyanwei
+ * @version
+ * @date Sep 11, 2015
+ * 
+ */
 public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> {
 
-    //private HttpRequest _request = null;
     /** Buffer that stores the response content */
     private final StringBuilder _requestBodyBuf = new StringBuilder();
 
@@ -75,6 +87,7 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
 
         if (msg instanceof HttpRequest) {
+            //处理HTTP头部信息
             //HttpRequest request = this._request = (HttpRequest) msg;
             this._request = (HttpRequest) msg;
             //
@@ -112,6 +125,7 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
         }
 
         if (msg instanceof HttpContent) {
+            //处理HTTP BODY ，对于BODY部分可能是chunked方式，如果是CHUNKED方式需要多次读取消息体
             HttpContent httpContent = (HttpContent) msg;
 
             ByteBuf content = httpContent.content();
@@ -119,7 +133,7 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
                 _requestBodyBuf.append(content.toString(CharsetUtil.UTF_8));
                 //content.release();
             }
-
+            //如果是消息体的最后部分，回写Response到下行通道，送回给客户端
             if (msg instanceof LastHttpContent) {
                 //
                 LastHttpContent trailer = (LastHttpContent) msg;
@@ -178,7 +192,7 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
      */
     private void writeResponseAndClose(ChannelHandlerContext ctx, String message) {
 
-        //System.out.println("handler:" + this.hashCode() + ">>" + this._serverConfig._requestListener.hashCode());
+        //如果response的内容为空，则使用响应代码的描述作为响应体
         ByteBuf responseContentBuf = null;
         if (Assert.isEmptyString(message) == true) {
             responseContentBuf = Unpooled.copiedBuffer(_responseStatus.reasonPhrase(), CharsetUtil.UTF_8);
@@ -188,7 +202,7 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
         // Decide whether to close the connection or not.
         // Build the response object.
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, _responseStatus, responseContentBuf);
-        //
+        //标明返回消息体的格式与编码
         response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");
         //disallow keepAlive
         //boolean keepAlive = HttpHeaders.isKeepAlive(_request);
@@ -197,21 +211,22 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
         response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
         // Add keep alive header as per:
         // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
+        //不支持服务器长连接
         response.headers().set(CONNECTION, HttpHeaders.Values.CLOSE);
         // Encode the cookie.
         String cookieString = _request.headers().get(COOKIE);
         if (cookieString != null) {
-            Set<Cookie> cookies = CookieDecoder.decode(cookieString);
+            Set<Cookie> cookies = ServerCookieDecoder.LAX.decode(cookieString);
             if (!cookies.isEmpty()) {
                 // Reset the cookies if necessary.
                 for (Cookie cookie : cookies) {
-                    response.headers().add(SET_COOKIE, ServerCookieEncoder.encode(cookie));
+                    response.headers().add(SET_COOKIE, ServerCookieEncoder.LAX.encode(cookie));
                 }
             }
         } else {
             // Browser sent no cookie.  Add some.
-            //response.headers().add(SET_COOKIE, ServerCookieEncoder.encode("key1", "value1"));
-            //response.headers().add(SET_COOKIE, ServerCookieEncoder.encode("key2", "value2"));
+            //response.headers().add(SET_COOKIE, ServerCookieEncoder.LAX.encode("key1", "value1"));
+            //response.headers().add(SET_COOKIE, ServerCookieEncoder.LAX.encode("key2", "value2"));
         }
         try {
             // Write the response.
@@ -224,11 +239,20 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
         }
     }
 
+    /**
+     * 触发监听器的成功方式.
+     * 
+     * @param message
+     * @return
+     * @throws Exception
+     */
     private String fireListenerSucceed(String message) throws Exception {
 
+        this._serverReferent.requestTotal();
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(this._request.getUri());
 
         String path = queryStringDecoder.path();
+        //如果PATH为空，默认为/
         if (Assert.isEmptyString(path) == true) {
             path = "/";
         }
@@ -245,8 +269,16 @@ public class HttpSnoopServerHandler extends SimpleChannelInboundHandler<Object> 
         }
     }
 
+    /**
+     * 触发监听器的失败方式.
+     * 
+     * @param cause
+     * @return
+     * @throws Exception
+     */
     private String fireListenerError(Throwable cause) throws Exception {
 
+        this._serverReferent.requestErrorTotal();
         return cause.toString();
     }
 }

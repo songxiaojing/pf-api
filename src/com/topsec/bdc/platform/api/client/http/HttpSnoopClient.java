@@ -159,7 +159,7 @@ public class HttpSnoopClient implements IClient {
 
             // Make the connection attempt.
             _channel = _clientBootstrap.connect(this._httpClientReferent._serverIpAddress, _httpClientReferent._serverPort).sync().channel();
-
+            Thread.sleep(10000L);
             // Send the HTTP request.
             _channel.writeAndFlush(request);
 

@@ -26,9 +26,9 @@ import com.topsec.bdc.platform.log.PlatformLogger;
 
 /**
  * 
- * HTTP影响服务.
+ * HTTP响应服务API.
  * 
- * HTTP影响服务，现实基础的HTTP服务，支持HTTP，HTTPS.
+ * HTTP响应服务API，现实基础的HTTP服务，支持HTTP，HTTPS，平台系统中的API可以继承此类现实自己的HTTPAPI.
  * 
  * @title HttpSnoopServer
  * @package com.topsec.bdc.platform.api.http.snoop.server
@@ -84,16 +84,17 @@ public abstract class HttpSnoopServer extends AbstractMetricMBean implements ISe
 
             //
             // Bind and start to accept incoming connections.
-            //  
+            //设置HTTP的服务工作线程池与管理线程池，NIO上下通道
             _bootstrap = new ServerBootstrap();
             _bootstrap.group(bossGroup, workerGroup);
             _bootstrap.channel(NioServerSocketChannel.class);
             _bootstrap.handler(new LoggingHandler(LogLevel.INFO));
             _bootstrap.childHandler(new HttpSnoopServerInitializer(sslCtx, _serverConfig));
             //
-            if (_serverConfig._enableTimeout == true) {
-                _bootstrap.option(ChannelOption.SO_TIMEOUT, _serverConfig._soTimeout);
-            }
+            //            if (_serverConfig._enableTimeout == true) {
+            //                _bootstrap.option(ChannelOption.SO_TIMEOUT, _serverConfig._soTimeout);
+            //            }
+            //不支持长连接
             _bootstrap.option(ChannelOption.SO_KEEPALIVE, false);
             //
             channelFuture = _bootstrap.bind(inetAddress);
